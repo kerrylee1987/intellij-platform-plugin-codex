@@ -1,15 +1,32 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>org.jetbrains.plugins.template</id>
-    <name>IntelliJ Platform Plugin Template</name>
-    <vendor>JetBrains</vendor>
+    <id>com.codex.intellij</id>
+    <name>Codex</name>
+    <vendor>Codex</vendor>
 
     <depends>com.intellij.modules.platform</depends>
 
-    <resource-bundle>messages.MyBundle</resource-bundle>
+    <resource-bundle>messages.CodexBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="org.jetbrains.plugins.template.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
-        <postStartupActivity implementation="org.jetbrains.plugins.template.startup.MyProjectActivity" />
+        <toolWindow factoryClass="com.codex.intellij.CodexToolWindowFactory" id="Codex"/>
+        <applicationConfigurable
+                id="com.codex.intellij.settings"
+                displayName="Codex"
+                implementation="com.codex.intellij.CodexSettingsConfigurable"/>
+        <applicationService serviceImplementation="com.codex.intellij.CodexSettingsState"/>
+        <projectService serviceImplementation="com.codex.intellij.CodexCliService"/>
+        <projectService serviceImplementation="com.codex.intellij.CodexToolWindowService"/>
+        <notificationGroup id="Codex" displayType="BALLOON"/>
     </extensions>
+
+    <actions>
+        <action id="Codex.SendSelection"
+                class="com.codex.intellij.CodexSendSelectionAction"
+                text="Send Selection to Codex"
+                description="Send the current editor selection to Codex">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt c"/>
+        </action>
+    </actions>
 </idea-plugin>
