@@ -1,6 +1,7 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import java.net.URLClassLoader
 
 plugins {
     id("java") // Java support
@@ -133,6 +134,29 @@ tasks {
 
     publishPlugin {
         dependsOn(patchChangelog)
+    }
+
+    register("verifyCodexPlugin") {
+        group = "verification"
+        description = "Validates Codex plugin wiring and runs unit tests."
+        dependsOn(test)
+        dependsOn("compileKotlin")
+        doLast {
+            val pluginXml = file("src/main/resources/META-INF/plugin.xml").readText()
+            require(pluginXml.contains("toolWindow") && pluginXml.contains("Codex")) {
+                "plugin.xml does not declare the Codex ToolWindow."
+            }
+            require(pluginXml.contains("Codex.SendSelection")) {
+                "plugin.xml does not declare the Codex.SendSelection action."
+            }
+
+            val classpath = sourceSets["main"].runtimeClasspath.map { it.toURI().toURL() }.toTypedArray()
+            URLClassLoader(classpath, null).use { loader ->
+                loader.loadClass("com.codex.intellij.CodexToolWindowFactory")
+                loader.loadClass("com.codex.intellij.CodexSendSelectionAction")
+                loader.loadClass("com.codex.intellij.CodexCliService")
+            }
+        }
     }
 }
 
