@@ -66,7 +66,7 @@ class CodexToolWindowPanel(private val project: Project) {
     private var context: CodexContext? = null
     private var streamingPanel: MessagePanel? = null
 
-    val component: JComponent = JBPanel<BorderLayout>(BorderLayout()).apply {
+    val component: JComponent = JPanel(BorderLayout()).apply {
         add(buildHeader(), BorderLayout.NORTH)
         add(messageScrollPane, BorderLayout.CENTER)
         add(buildInputArea(), BorderLayout.SOUTH)
@@ -86,18 +86,18 @@ class CodexToolWindowPanel(private val project: Project) {
     }
 
     private fun buildHeader(): JComponent {
-        val header = JBPanel<BorderLayout>(BorderLayout()).apply {
+        val header = JPanel(BorderLayout()).apply {
             border = JBUI.Borders.compound(
                 JBUI.Borders.empty(8, 8, 4, 8),
                 JBUI.Borders.customLineBottom(JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground()),
             )
         }
-        val statusPanel = JBPanel<HorizontalLayout>(HorizontalLayout(8)).apply {
+        val statusPanel = JPanel(HorizontalLayout(8)).apply {
             add(statusLabel)
             add(Box.createHorizontalStrut(8))
             add(contextLabel)
         }
-        val buttonPanel = JBPanel<HorizontalLayout>(HorizontalLayout(4)).apply {
+        val buttonPanel = JPanel(HorizontalLayout(4)).apply {
             add(useSelectionButton)
             add(useFileButton)
             add(clearContextButton)
@@ -108,10 +108,10 @@ class CodexToolWindowPanel(private val project: Project) {
     }
 
     private fun buildInputArea(): JComponent {
-        val inputPanel = JBPanel<BorderLayout>(BorderLayout()).apply {
+        val inputPanel = JPanel(BorderLayout()).apply {
             border = JBUI.Borders.empty(8)
         }
-        val actionsPanel = JBPanel<HorizontalLayout>(HorizontalLayout(8)).apply {
+        val actionsPanel = JPanel(HorizontalLayout(8)).apply {
             add(sendButton)
             add(cancelButton)
         }
@@ -270,14 +270,14 @@ class CodexToolWindowPanel(private val project: Project) {
         private val project: Project,
         val author: String,
         content: String,
-    ) : JBPanel<BorderLayout>(BorderLayout()) {
+    ) : JPanel(BorderLayout()) {
         private val contentArea = JBTextArea(content).apply {
             lineWrap = true
             wrapStyleWord = true
             isEditable = false
             border = JBUI.Borders.empty(4)
         }
-        private val actionsPanel = JBPanel<HorizontalLayout>(HorizontalLayout(8))
+        private val actionsPanel = JPanel(HorizontalLayout(8))
 
         init {
             border = JBUI.Borders.customLine(JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground())

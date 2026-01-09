@@ -8,9 +8,6 @@ import com.intellij.ui.dsl.builder.panel
 import javax.swing.JComponent
 
 class CodexSettingsConfigurable : SearchableConfigurable {
-    private var cliPathField: JBTextField? = null
-    private var timeoutField: JBTextField? = null
-    private var maxContextField: JBTextField? = null
     private var component: JComponent? = null
 
     override fun getId(): String = "com.codex.intellij.settings"
@@ -20,23 +17,20 @@ class CodexSettingsConfigurable : SearchableConfigurable {
     override fun createComponent(): JComponent {
         val settings = CodexSettingsState.getInstance().state
         val panel = panel {
-            row("Codex CLI path") {
-                cliPathField = textField()
+            row("Codex CLI path:") {
+                textField()
                     .bindText(settings::cliPath)
                     .comment("Leave blank to use codex from PATH.")
-                    .component
             }
-            row("Timeout (seconds)") {
-                timeoutField = textField()
-                    .bindIntText(settings::timeoutSeconds, min = 10, max = 600)
+            row("Timeout (seconds):") {
+                intTextField(10..600)
+                    .bindIntText(settings::timeoutSeconds)
                     .comment("Default 120 seconds.")
-                    .component
             }
-            row("Max context size (chars)") {
-                maxContextField = textField()
-                    .bindIntText(settings::maxContextChars, min = 512, max = 50000)
+            row("Max context size (chars):") {
+                intTextField(512..50000)
+                    .bindIntText(settings::maxContextChars)
                     .comment("Trims selection or file context before sending.")
-                    .component
             }
         }
         component = panel
@@ -44,23 +38,33 @@ class CodexSettingsConfigurable : SearchableConfigurable {
     }
 
     override fun isModified(): Boolean {
-        val settings = CodexSettingsState.getInstance().state
-        return cliPathField?.text != settings.cliPath ||
-            timeoutField?.text?.toIntOrNull() != settings.timeoutSeconds ||
-            maxContextField?.text?.toIntOrNull() != settings.maxContextChars
+        // The DSL panel handles isModified automatically if we rely on it, 
+        // but SearchableConfigurable requires us to implement it if we don't use BoundConfigurable.
+        // However, with 'bindText' and 'bindIntText', the panel can check for modifications.
+        // But since we are storing the panel in 'component', we can't easily access the inner cells 
+        // without keeping references.
+        // For simplicity in this DSL version, the best practice is to extend BoundConfigurable.
+        // But to keep it compatible with the current interface SearchableConfigurable:
+        // We can just return true (always apply) or implement properly.
+        // Let's implement properly by creating the panel and letting it handle apply/reset.
+        // Wait, 'apply' is called on the configurable.
+        // If we use `bindText(settings::cliPath)`, the `panel.apply()` needs to be called.
+        // SearchableConfigurable doesn't automatically call panel.apply().
+        // We should use `BoundConfigurable` if possible, or manually handle it.
+        // Given the constraints, I will switch to BoundConfigurable pattern if I can change the superclass.
+        // But let's stick to SearchableConfigurable and use the panel's apply/isModified if available.
+        // In recent Platform versions, `panel.isModified()` and `panel.apply()` exist.
+        val p = component as? com.intellij.openapi.ui.DialogPanel
+        return p?.isModified() ?: false
     }
 
     override fun apply() {
-        val settings = CodexSettingsState.getInstance().state
-        settings.cliPath = cliPathField?.text?.trim().orEmpty()
-        settings.timeoutSeconds = timeoutField?.text?.toIntOrNull() ?: settings.timeoutSeconds
-        settings.maxContextChars = maxContextField?.text?.toIntOrNull() ?: settings.maxContextChars
+        val p = component as? com.intellij.openapi.ui.DialogPanel
+        p?.apply()
     }
 
     override fun reset() {
-        val settings = CodexSettingsState.getInstance().state
-        cliPathField?.text = settings.cliPath
-        timeoutField?.text = settings.timeoutSeconds.toString()
-        maxContextField?.text = settings.maxContextChars.toString()
+        val p = component as? com.intellij.openapi.ui.DialogPanel
+        p?.reset()
     }
 }

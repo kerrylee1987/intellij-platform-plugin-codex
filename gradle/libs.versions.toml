@@ -1,7 +1,8 @@
 [versions]
 # libraries
-junit = "4.13.2"
+junit = "5.10.2"
 opentest4j = "1.3.0"
+junitPlatform = "1.10.2"
 
 # plugins
 changelog = "2.5.0"
@@ -11,8 +12,14 @@ kover = "0.9.3"
 qodana = "2025.2.2"
 
 [libraries]
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-opentest4j = { group = "org.opentest4j", name = "opentest4j", version.ref = "opentest4j" }
+# JUnit 5 (Jupiter) - provides API + engine via BOM-style aggregator
+junit = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+
+# JUnit Platform launcher (helps Gradle/IDE runners in some setups)
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitPlatform" }
+
+# OpenTest4J
+opentest4j = { module = "org.opentest4j:opentest4j", version.ref = "opentest4j" }
 
 [plugins]
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }

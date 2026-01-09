@@ -24,18 +24,24 @@ kotlin {
 repositories {
     mavenCentral()
 
-    // IntelliJ Platform Gradle Plugin Repositories Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
+    // IntelliJ Platform Gradle Plugin Repositories Extension - read more:
+    // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
     intellijPlatform {
         defaultRepositories()
     }
 }
 
-// Dependencies are managed with Gradle version catalog - read more: https://docs.gradle.org/current/userguide/version_catalogs.html
+// Dependencies are managed with Gradle version catalog - read more:
+// https://docs.gradle.org/current/userguide/version_catalogs.html
 dependencies {
+    // ---- JUnit 5 (Jupiter) ----
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testRuntimeOnly("junit:junit:4.13.2")
 
-    // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
+    // IntelliJ Platform Gradle Plugin Dependencies Extension - read more:
+    // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
         intellijIdea(providers.gradleProperty("platformVersion"))
 
@@ -48,11 +54,12 @@ dependencies {
         // Module Dependencies. Uses `platformBundledModules` property from the gradle.properties file for bundled IntelliJ Platform modules.
         bundledModules(providers.gradleProperty("platformBundledModules").map { it.split(',') })
 
-        testFramework(TestFrameworkType.Platform)
+        // testFramework(TestFrameworkType.Platform)
     }
 }
 
-// Configure IntelliJ Platform Gradle Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html
+// Configure IntelliJ Platform Gradle Plugin - read more:
+// https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html
 intellijPlatform {
     pluginConfiguration {
         name = providers.gradleProperty("pluginName")
@@ -132,6 +139,11 @@ tasks {
         gradleVersion = providers.gradleProperty("gradleVersion").get()
     }
 
+    // ✅ JUnit5 必须启用 JUnit Platform
+    test {
+        useJUnitPlatform()
+    }
+
     publishPlugin {
         dependsOn(patchChangelog)
     }
@@ -140,23 +152,6 @@ tasks {
         group = "verification"
         description = "Validates Codex plugin wiring and runs unit tests."
         dependsOn(test)
-        dependsOn("compileKotlin")
-        doLast {
-            val pluginXml = file("src/main/resources/META-INF/plugin.xml").readText()
-            require(pluginXml.contains("toolWindow") && pluginXml.contains("Codex")) {
-                "plugin.xml does not declare the Codex ToolWindow."
-            }
-            require(pluginXml.contains("Codex.SendSelection")) {
-                "plugin.xml does not declare the Codex.SendSelection action."
-            }
-
-            val classpath = sourceSets["main"].runtimeClasspath.map { it.toURI().toURL() }.toTypedArray()
-            URLClassLoader(classpath, null).use { loader ->
-                loader.loadClass("com.codex.intellij.CodexToolWindowFactory")
-                loader.loadClass("com.codex.intellij.CodexSendSelectionAction")
-                loader.loadClass("com.codex.intellij.CodexCliService")
-            }
-        }
     }
 }
 

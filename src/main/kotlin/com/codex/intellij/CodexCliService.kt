@@ -8,6 +8,7 @@ import com.intellij.execution.process.ProcessOutputType
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
 import com.intellij.util.concurrency.AppExecutorUtil
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -89,7 +90,7 @@ class CodexCliService(private val project: Project) {
         val errorBuffer = StringBuilder()
         val timedOutFlag = AtomicBoolean(false)
         handler.addProcessListener(object : ProcessAdapter() {
-            override fun onTextAvailable(event: ProcessEvent, outputType: com.intellij.execution.process.Key<*>) {
+            override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
                 val text = event.text
                 if (outputType === ProcessOutputType.STDOUT) {
                     outputBuffer.append(text)
